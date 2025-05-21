@@ -1,4 +1,5 @@
-using System; // Este sí lo podés dejar, aunque no es necesario
+using System;
+using GhostCharacter_Free.Scripts; // Este sí lo podés dejar, aunque no es necesario
 using UnityEngine;
 
 public class Gun : MonoBehaviour
@@ -7,7 +8,11 @@ public class Gun : MonoBehaviour
     public LineRenderer linePrefab;
     public Transform shootingPoint;
     public float maxDistance = 100f;
-    public float showTime = 0.5f;
+    public float showTime = 0.2f;
+    
+    public GameObject rayImpactPrefab;
+
+    public LayerMask layerMask;
 
     private void Update()
     {
@@ -20,6 +25,34 @@ public class Gun : MonoBehaviour
 
     private void Shoot()
     {
+        Ray ray = new Ray(shootingPoint.position, shootingPoint.forward);
+        bool  hasHit = Physics.Raycast(ray, out RaycastHit hit, maxDistance, layerMask);
+        Vector3 endPoint = hit.point;
+        if (hasHit)
+        {
+            endPoint = hit.point;
+            GhostMove ghost = hit.transform.gameObject.GetComponentInParent<GhostMove>();
+
+            if (ghost != null)
+            {
+                //Kill ghost
+                hit.collider.enabled = false;
+                ghost.Kill();
+            }
+            else
+            {
+                Debug.Log("Hit" + hit.transform.name);
+                Quaternion rayImpactRotation = Quaternion.LookRotation(hit.normal);
+                GameObject rayImpact = Instantiate(rayImpactPrefab, hit.point, rayImpactRotation);
+                Destroy(rayImpact, 1f);    
+            }
+            
+            
+        }
+        else
+        {
+            endPoint = shootingPoint.position + shootingPoint.forward * maxDistance;
+        }
         Vector3 start = shootingPoint.position;
         Vector3 end = start + shootingPoint.forward * maxDistance;
 
