@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     public OrbSpawner orbSpawner;
     public GameObject winCanvas;
     public GameObject loseCanvas;
+    
+    public float delayBeforeCheck = 2.0f;
+    private float startTime;
 
     private void Awake()
     {
@@ -16,44 +19,46 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        startTime = Time.time;
         winCanvas.SetActive(false);
         loseCanvas.SetActive(false);
     }
 
-    // public IEnumerator  CheckGameStatus()
-    // {
-    //     // Espera a que el OrbSpawner haya empezado
-    //     yield return new WaitUntil(() => orbSpawner.HasStartedSpawning);
-    //
-    //     while (true)
-    //     {
-    //         int activeOrbs = GameObject.FindGameObjectsWithTag("Orb").Length;
-    //         int activeGhosts = GameObject.FindGameObjectsWithTag("Ghost").Length;
-    //
-    //         // Solo pierdes si no hay orbes Y ya se spawnearon todos
-    //         if (activeOrbs == 0 && orbSpawner.HasFinishedSpawning)
-    //         {
-    //             LoseGame();
-    //             yield break;
-    //         }
-    //         else if (activeGhosts == 0)
-    //         {
-    //             WinGame();
-    //             yield break;
-    //         }
-    //
-    //         yield return new WaitForSeconds(0.5f);
-    //     }
-    // }
+    private void Update()
+    {
+        if (Time.time - startTime > delayBeforeCheck)
+        {
+            CheckGameStatus();
+        }
+    }
 
+
+    public void CheckGameStatus()
+    {
+        float orbCount = GameObject.FindGameObjectsWithTag("Orb").Length;
+        float ghostCount = GameObject.FindGameObjectsWithTag("Ghost").Length;
+
+        if (orbCount <= 0)
+        {
+            LoseGame();
+        }
+
+        if (ghostCount <= 0)
+        {
+            WinGame();
+        }
+        
+    }
 
     public void WinGame()
     {
         winCanvas.SetActive(true);
+        Time.timeScale = 0;
     }
 
     public void LoseGame()
     {
         loseCanvas.SetActive(true);
+        Time.timeScale = 0;
     }
 }
